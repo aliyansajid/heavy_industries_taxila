@@ -23,7 +23,6 @@ const SearchModal = ({
         text={"Select"}
         className="w-full"
         iconSrc={PlusCircle}
-        onClick={() => setIsOpen(false)}
       />
     </ModalDialog>
   );
