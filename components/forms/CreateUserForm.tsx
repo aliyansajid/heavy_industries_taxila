@@ -13,6 +13,8 @@ import { Plus } from "lucide-react";
 
 const CreateUserForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const formSchema = createUserSchema;
 
@@ -22,6 +24,31 @@ const CreateUserForm = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error creating user");
+      }
+
+      const data = await response.json();
+      setSuccessMessage("User created successfully!");
+      form.reset();
+    } catch (error) {
+      setErrorMessage(
+        "There was an error creating the user. Please try again."
+      );
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -31,6 +58,11 @@ const CreateUserForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-5 w-1/2 p-8"
         >
+          {successMessage && (
+            <p className="text-green-500 ">{successMessage}</p>
+          )}
+          {errorMessage && <p className="text-red-500 ">{errorMessage}</p>}
+
           <div className="flex gap-4">
             <div className="flex-1">
               <CustomFormField
