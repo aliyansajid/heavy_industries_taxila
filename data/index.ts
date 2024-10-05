@@ -12,17 +12,20 @@ import {
   Building,
 } from "lucide-react";
 
+export type Role = "Admin" | "CR" | "User";
+
 export const sidebarLinks = [
-  {
-    label: "Create Department",
-    route: "/create-department",
-    icon: Building,
-  },
   {
     label: "Create User",
     route: "/create-user",
     icon: User,
   },
+  {
+    label: "Create Department",
+    route: "/create-department",
+    icon: Building,
+  },
+
   {
     label: "Upload",
     route: "/upload",
@@ -48,7 +51,6 @@ export const sidebarLinks = [
     route: "/track-letter",
     icon: Mail,
   },
-
   {
     label: "Write",
     route: "/write",
@@ -70,3 +72,14 @@ export const sidebarLinks = [
     icon: LogOut,
   },
 ];
+
+export const roleBasedMenuOptions: Record<Role, string[]> = {
+  Admin: ["/create-department", "/create-user"],
+  CR: ["/upload", "/search", "/track-letter", "/logout"],
+  User: ["/inbox", "/outbox", "/write", "/send", "/send-request", "/logout"],
+};
+
+export const getSidebarLinksByRole = (userRole: Role) => {
+  const allowedRoutes = roleBasedMenuOptions[userRole] || [];
+  return sidebarLinks.filter((link) => allowedRoutes.includes(link.route));
+};

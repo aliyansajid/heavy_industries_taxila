@@ -1,12 +1,28 @@
 "use client";
 
-import { sidebarLinks } from "@/data";
+import { getSidebarLinksByRole, Role } from "@/data";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const Sidebar = () => {
+  const { data: session } = useSession();
   const pathName = usePathname();
+
+  if (!session) {
+    return <p>Loading...</p>;
+  }
+
+  const userRoleFromSession = session?.user?.role;
+
+  const userRole: Role = (
+    ["Admin", "CR", "User"].includes(userRoleFromSession)
+      ? userRoleFromSession
+      : "User"
+  ) as Role;
+
+  const filteredLinks = getSidebarLinksByRole(userRole);
 
   return (
     <nav className="hidden lg:flex flex-col w-60 min-h-screen bg-background-secondary border-r border-border-primary">
@@ -16,7 +32,7 @@ const Sidebar = () => {
       >
         <h1 className="text-xl font-medium">HIT</h1>
       </Link>
-      {sidebarLinks.map((item) => {
+      {filteredLinks.map((item) => {
         const isActive =
           pathName === item.route || pathName.startsWith(`${item.route}/`);
 

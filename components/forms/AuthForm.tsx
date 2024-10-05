@@ -41,7 +41,20 @@ const AuthForm = () => {
           variant: "destructive",
         });
       } else {
-        router.push("/upload");
+        switch (values.role) {
+          case "Admin":
+            router.push("/create-user");
+            break;
+          case "CR":
+            router.push("/upload");
+            break;
+          case "User":
+            router.push("/inbox");
+            break;
+          default:
+            router.push("/");
+            break;
+        }
       }
     } catch (error) {
       toast({
