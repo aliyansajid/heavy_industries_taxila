@@ -9,8 +9,13 @@ import { loginSchema } from "@/lib/utils";
 import { z } from "zod";
 import CustomButton, { ButtonVariant } from "../CustomButton";
 import { SelectItem } from "../ui/select";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const formSchema = loginSchema;
@@ -21,6 +26,31 @@ const AuthForm = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        username: values.username,
+        password: values.password,
+        role: values.role,
+      });
+
+      if (result?.error) {
+        toast({
+          description: "Invalid credentials",
+          variant: "destructive",
+        });
+      } else {
+        router.push("/upload");
+      }
+    } catch (error) {
+      toast({
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

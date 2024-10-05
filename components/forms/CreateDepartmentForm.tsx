@@ -9,6 +9,7 @@ import { createDepartmentSchema } from "@/lib/utils";
 import { z } from "zod";
 import CustomButton, { ButtonVariant } from "../CustomButton";
 import { Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Employee = {
   id: string;
@@ -16,15 +17,15 @@ type Employee = {
 };
 
 const CreateDepartmentForm = () => {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const formSchema = createDepartmentSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: { name: "", description: "", employees: [] },
   });
 
   useEffect(() => {
@@ -34,8 +35,11 @@ const CreateDepartmentForm = () => {
         const data = await response.json();
         setEmployees(data);
       } catch (error) {
+        toast({
+          description: "There was an error fetching the employees.",
+          variant: "destructive",
+        });
         console.error("Error fetching employees:", error);
-        setError("Error fetching employees");
       }
     };
 
@@ -55,13 +59,23 @@ const CreateDepartmentForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Error creating department");
+        toast({
+          description: "There was an error creating the department.",
+          variant: "destructive",
+        });
       }
 
       const data = await response.json();
-      setSuccessMessage("Department created successfully!");
+      toast({
+        description: "Department created successfully.",
+        variant: "default",
+      });
       form.reset();
     } catch (error) {
+      toast({
+        description: "There was an error creating the department.",
+        variant: "destructive",
+      });
       console.error("Error during department creation:", error);
     } finally {
       setIsLoading(false);
@@ -75,10 +89,6 @@ const CreateDepartmentForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-5 w-1/2 p-8"
         >
-          {error && <p className="text-red-500">{error}</p>}
-
-          {successMessage && <p className="text-green-500">{successMessage}</p>}
-
           <CustomFormField
             fieldType={FormFieldType.INPUT}
             control={form.control}

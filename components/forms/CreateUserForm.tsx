@@ -10,16 +10,24 @@ import { z } from "zod";
 import CustomButton, { ButtonVariant } from "../CustomButton";
 import { SelectItem } from "../ui/select";
 import { Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const CreateUserForm = () => {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const formSchema = createUserSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      username: "",
+      designation: "",
+      rank: "",
+      password: "",
+      role: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -35,17 +43,25 @@ const CreateUserForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Error creating user");
+        toast({
+          description:
+            "There was an error creating the user. Please try again.",
+          variant: "destructive",
+        });
       }
 
       const data = await response.json();
-      setSuccessMessage("User created successfully!");
+      toast({
+        description: "User created successfully.",
+        variant: "default",
+      });
       form.reset();
     } catch (error) {
-      setErrorMessage(
-        "There was an error creating the user. Please try again."
-      );
-      console.error(error);
+      toast({
+        description: "There was an error creating the user. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error creating user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -58,11 +74,6 @@ const CreateUserForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-5 w-1/2 p-8"
         >
-          {successMessage && (
-            <p className="text-green-500 ">{successMessage}</p>
-          )}
-          {errorMessage && <p className="text-red-500 ">{errorMessage}</p>}
-
           <div className="flex gap-4">
             <div className="flex-1">
               <CustomFormField
@@ -106,7 +117,7 @@ const CreateUserForm = () => {
             control={form.control}
             name="password"
             label="Password"
-            placeholder={"********"}
+            placeholder="********"
           />
 
           <CustomFormField
