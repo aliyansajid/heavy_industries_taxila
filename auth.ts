@@ -10,15 +10,18 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     Credentials({
       async authorize(credentials) {
         try {
-          const response = await fetch(`${process.env.BACKEND_URL}/api/login`, {
-            method: "POST",
-            body: JSON.stringify({
-              username: credentials?.username,
-              password: credentials?.password,
-              role: credentials?.role,
-            }),
-            headers: { "Content-Type": "application/json" },
-          });
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/login`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                username: credentials?.username,
+                password: credentials?.password,
+                role: credentials?.role,
+              }),
+              headers: { "Content-Type": "application/json" },
+            }
+          );
 
           const data = await response.json();
 

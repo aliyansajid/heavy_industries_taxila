@@ -85,7 +85,6 @@ export const roleBasedMenuOptions: Record<Role, string[]> = {
   User: [
     "/inbox",
     "/outbox",
-    "/outbox",
     "/track-letter",
     "/write",
     "/send",
