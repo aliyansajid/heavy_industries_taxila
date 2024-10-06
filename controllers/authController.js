@@ -29,7 +29,10 @@ exports.loginUser = async (req, res) => {
       role: user.role,
     });
   } catch (error) {
-    console.error("Login failed:", error);
-    res.status(500).json({ error: "Login failed" });
+    console.error("Login failed: ", error);
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while loging user.",
+    });
   }
 };
