@@ -1,57 +1,18 @@
-import { ArrowDownIcon, ArrowUpIcon } from "@radix-ui/react-icons";
-
 export const categories = [
   {
-    value: "income",
+    value: "Most Immediate",
     label: "Income",
   },
   {
-    value: "food",
-    label: "Food",
+    value: "Immediate",
+    label: "Immediate",
   },
   {
-    value: "utilities",
-    label: "Utilities",
+    value: "Priority",
+    label: "Priority",
   },
   {
-    value: "housing",
-    label: "Housing",
-  },
-  {
-    value: "health",
-    label: "Health",
-  },
-  {
-    value: "transport",
-    label: "Transport",
-  },
-  {
-    value: "work",
-    label: "Work",
-  },
-  {
-    value: "entertainment",
-    label: "Entertainment",
-  },
-  {
-    value: "education",
-    label: "Education",
-  },
-  {
-    value: "gifts",
-    label: "Gifts",
-  },
-];
-
-export const incomeType = [
-  {
-    label: "Income",
-    value: "income",
-    icon: ArrowUpIcon,
-  },
-  {
-    label: "Expense",
-    value: "expense",
-    icon: ArrowDownIcon,
+    value: "MMU",
+    label: "MMU",
   },
 ];

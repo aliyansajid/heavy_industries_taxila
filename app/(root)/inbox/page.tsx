@@ -1,36 +1,14 @@
-import { DataTable } from "@/components/DataTable/DataTable";
-import { columns } from "@/components/DataTable/Columns";
-import SectionHeader from "@/components/SectionHeader";
-import TopHeader from "@/components/TopHeader";
-import fs from "fs";
-import path from "path";
+import { auth } from "@/auth";
+import Inbox from "@/components/Inbox";
+import { fetchInboxLetters } from "@/lib/fetchLetters";
 
-async function getData() {
-  const filePath = path.join(
-    process.cwd(),
-    "components",
-    "DataTable",
-    "data.json"
-  );
+const InboxPage = async () => {
+  const session = await auth();
 
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File not found: ${filePath}`);
-  }
+  const userId = session?.user.id;
+  const letters = await fetchInboxLetters(userId as string);
 
-  const data = fs.readFileSync(filePath, "utf8");
-  return JSON.parse(data);
-}
-
-const Inbox = async () => {
-  const data = await getData();
-
-  return (
-    <section>
-      <TopHeader />
-      <SectionHeader title="Inbox" />
-      <DataTable data={data} columns={columns} />
-    </section>
-  );
+  return <Inbox letters={letters} />;
 };
 
-export default Inbox;
+export default InboxPage;

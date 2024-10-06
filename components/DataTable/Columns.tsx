@@ -50,17 +50,19 @@ export const columns: ColumnDef<Letters>[] = [
     },
   },
   {
-    accessorKey: "receivedDate",
+    accessorKey: "date",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Received Date" />
     ),
     cell: ({ row }) => {
-      const date = new Date(row.getValue("receivedDate"));
+      const date = new Date(row.getValue("date") as string);
+
       const formattedDate = date.toLocaleDateString("en-US", {
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
+
       return (
         <div className="flex w-[100px] items-center">
           <span className="capitalize">{formattedDate}</span>
@@ -68,7 +70,7 @@ export const columns: ColumnDef<Letters>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      const rowDate = new Date(row.getValue(id));
+      const rowDate = new Date(row.getValue(id) as string);
       const [startDate, endDate] = value;
       return rowDate >= startDate && rowDate <= endDate;
     },
