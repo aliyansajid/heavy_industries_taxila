@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-exports.createScannerEntry = async (req, res) => {
+exports.createScanner = async (req, res) => {
   const { letterId, departmentId, sendTo, sendBy, subject, reference } =
     req.body;
 
@@ -11,9 +11,7 @@ exports.createScannerEntry = async (req, res) => {
         letter: {
           connect: { id: letterId },
         },
-        department: {
-          connect: { id: departmentId },
-        },
+        departmentId,
         sendTo,
         sendBy,
         subject,
@@ -38,7 +36,6 @@ exports.createScannerEntry = async (req, res) => {
       scannerEntry,
     });
   } catch (error) {
-    console.error("Error creating scanner entry: ", error);
     res.status(500).json({
       status: "error",
       message: "Error occurred while creating scanner entry.",

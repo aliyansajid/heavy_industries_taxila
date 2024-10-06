@@ -7,44 +7,30 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Department {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  employees   DepartmentEmployees[]
-  scanners    Scanner[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("departments")
-}
-
 model User {
-  id           String                 @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  username     String                 @unique
+  username     String    @unique
   designation  String
   rank         String
   password     String
   role         String
   inbox        String[]
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  
-  departments  DepartmentEmployees[]
-  letters      Letter[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("users")
 }
 
-model DepartmentEmployees {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId String     @db.ObjectId
-  user         User       @relation(fields: [userId], references: [id])
-  userId       String     @db.ObjectId
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+model Department {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  employees   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("departments")
 }
 
 model Letter {
@@ -52,26 +38,29 @@ model Letter {
   subject      String   
   reference    String   
   priority     String
-  fileLocation String   
+  fileLocation String
   drafts       String?   
   remarks      String?  
-  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
-  uploadedById String    @db.ObjectId
-  scanners     Scanner[] 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  uploadedBy   String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  scanners     Scanner[] @relation("LetterScanners")
+
+  @@map("letters")
 }
 
 model Scanner {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  letter         Letter     @relation(fields: [letterId], references: [id])
+  letter         Letter     @relation("LetterScanners", fields: [letterId], references: [id])
   letterId       String     @db.ObjectId
-  sendTo         String[] 
+  sendTo         String[]
   sendBy         String     @db.ObjectId
-  department     Department @relation(fields: [departmentId], references: [id])
   departmentId   String     @db.ObjectId
   subject        String
   reference      String
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+
+  @@map("scanners")
 }
