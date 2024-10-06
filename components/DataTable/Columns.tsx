@@ -1,10 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Expense } from "./schema";
+import { Letters } from "./schema";
 import { DataTableColumnHeader } from "./ColumnHeader";
 
-export const columns: ColumnDef<Expense>[] = [
+export const columns: ColumnDef<Letters>[] = [
   {
     accessorKey: "subject",
     header: ({ column }) => (

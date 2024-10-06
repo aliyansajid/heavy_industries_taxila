@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-export const expenseSchema = z.object({
+export const lettersSchema = z.object({
   id: z.string(),
-  label: z.string(),
-  note: z.string(),
-  category: z.string(),
-  type: z.enum(["income", "expense"]),
-  amount: z.number(),
+  subject: z.string(),
+  reference: z.string(),
+  priority: z.string(),
   date: z.string(),
 });
 
-export type Expense = z.infer<typeof expenseSchema>;
+export type Letters = z.infer<typeof lettersSchema>;
