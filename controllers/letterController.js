@@ -34,3 +34,39 @@ exports.uploadLetter = async (req, res) => {
     });
   }
 };
+
+exports.getLetters = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { inbox: true },
+    });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "User not found." });
+    }
+
+    const letters = await prisma.letter.findMany({
+      where: {
+        id: {
+          in: user.inbox,
+        },
+      },
+    });
+
+    res.status(200).json({
+      status: "ok",
+      letters,
+    });
+  } catch (error) {
+    console.error("Error fetching letters:", error);
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while fetching letters.",
+    });
+  }
+};

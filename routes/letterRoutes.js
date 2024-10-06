@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { uploadLetter } = require("../controllers/letterController");
+const { uploadLetter, getLetters } = require("../controllers/letterController");
 
 const router = express.Router();
 
@@ -17,5 +17,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/upload-letter", upload.single("file"), uploadLetter);
+router.get("/get-letters/:userId", getLetters);
 
 module.exports = router;
