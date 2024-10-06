@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
 const letterRoutes = require("./routes/letterRoutes");
 const searchRoutes = require("./routes/searchRoutes");
+const scannerRoutes = require("./routes/scannerRoutes");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/letters", letterRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/scanner", scannerRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

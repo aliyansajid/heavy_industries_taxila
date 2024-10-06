@@ -51,6 +51,7 @@ exports.getDepartments = async (req, res) => {
     });
 
     const result = departments.map((department) => ({
+      id: department.id,
       name: department.name,
       employees: department.employees.map((emp) => ({
         id: emp.user.id,
