@@ -61,12 +61,11 @@ interface CustomProps {
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
-  const [date, setDate] = React.useState<Date>();
   const {
     fieldType,
     type,
     placeholder,
-    name,
+    disabled,
     onKeyDown,
     onChange,
     readOnly,
@@ -106,7 +105,17 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
 
     case FormFieldType.SELECT:
       return (
-        <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <Select
+          onValueChange={(value) => {
+            field.onChange({
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>);
+            props.onChange?.({
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
+          value={field.value}
+        >
           <FormControl>
             <SelectTrigger className="w-full">
               <SelectValue placeholder={props.placeholder} />
@@ -126,6 +135,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           variant="inverted"
           animation={2}
           maxCount={3}
+          disabled={disabled}
         />
       );
 

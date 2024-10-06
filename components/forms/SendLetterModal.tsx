@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import CustomFormField, { FormFieldType } from "../CustomFormField";
@@ -8,6 +11,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SelectItem } from "../ui/select";
 import ModalDialog from "../ModalDialog";
 import { Send } from "lucide-react";
+
+type Employee = {
+  id: string;
+  name: string;
+};
+
+type Department = {
+  name: string;
+  employees: Employee[];
+};
 
 const SendLetterModal = ({
   isOpen,
@@ -21,6 +34,43 @@ const SendLetterModal = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departmentSelected, setDepartmentSelected] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchDepartments = async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/departments`,
+            {
+              method: "GET",
+            }
+          );
+          const data = await response.json();
+          setDepartments(data);
+        } catch (error) {
+          console.error("Error fetching departments:", error);
+        }
+      };
+      fetchDepartments();
+    }
+  }, [isOpen]);
+
+  const handleDepartmentChange = (selectedDepartment: string) => {
+    const department = departments.find(
+      (dept: Department) => dept.name === selectedDepartment
+    );
+    if (department) {
+      setEmployees(department.employees);
+      setDepartmentSelected(true);
+    } else {
+      setEmployees([]);
+      setDepartmentSelected(false);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {}
 
@@ -38,11 +88,14 @@ const SendLetterModal = ({
             control={form.control}
             name="department"
             label="Department"
-            placeholder="Select an option"
+            placeholder="Select a department"
+            onChange={(e: any) => handleDepartmentChange(e.target.value)}
           >
-            <SelectItem value="Engineering">Engineering</SelectItem>
-            <SelectItem value="Marketing">Marketing</SelectItem>
-            <SelectItem value="Sales">Sales</SelectItem>
+            {departments.map((dept: Department) => (
+              <SelectItem key={dept.name} value={dept.name}>
+                {dept.name}
+              </SelectItem>
+            ))}
           </CustomFormField>
 
           <CustomFormField
@@ -50,12 +103,12 @@ const SendLetterModal = ({
             control={form.control}
             name="employees"
             label="Employees"
-            placeholder="Select an option"
-            options={[
-              { label: "John Doe", value: "john" },
-              { label: "Jane Smith", value: "jane" },
-              { label: "Mike Johnson", value: "mike" },
-            ]}
+            placeholder="Select employees"
+            disabled={!departmentSelected}
+            options={employees.map((emp: Employee) => ({
+              label: emp.name,
+              value: emp.id,
+            }))}
           />
 
           <CustomButton

@@ -9,21 +9,77 @@ import { uploadFormSchema } from "@/lib/utils";
 import { z } from "zod";
 import CustomButton, { ButtonVariant } from "../CustomButton";
 import { SelectItem } from "../ui/select";
-import { Save, Send, Upload } from "lucide-react";
+import { Save, Send } from "lucide-react";
 import SendLetterModal from "./SendLetterModal";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
 const UploadForm = () => {
+  const { toast } = useToast();
+  const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   const formSchema = uploadFormSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      subject: "",
+      reference: "",
+      confirm_reference: "",
+      priority: "",
+      file: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("subject", values.subject);
+      formData.append("reference", values.reference);
+      formData.append("priority", values.priority);
+      if (file) {
+        formData.append("file", file);
+      }
+      if (session) {
+        formData.append("uploadedBy", session?.user.id);
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/letters/upload-letter`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          description: result.message,
+          variant: "default",
+        });
+        form.reset();
+        setFile(null);
+      } else {
+        toast({
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading letter: ", error);
+      toast({
+        description: "There was an error uploading the letter.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -70,13 +126,20 @@ const UploadForm = () => {
             <SelectItem value="MMU">MMU</SelectItem>
           </CustomFormField>
 
-          <CustomButton
-            variant={ButtonVariant.OUTLINE}
-            text={"Upload"}
-            className="w-full"
-            iconSrc={Upload}
-            onClick={() => setIsModalOpen(true)}
+          <CustomFormField
+            fieldType={FormFieldType.INPUT}
+            type="file"
+            control={form.control}
+            name="file"
+            label="Browse files"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setFile(e.target.files[0]);
+              }
+            }}
+            className="cursor-pointer"
           />
+
           <div className="flex space-x-4">
             <div className="flex-1">
               <CustomButton

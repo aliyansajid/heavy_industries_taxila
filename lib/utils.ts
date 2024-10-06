@@ -41,7 +41,7 @@ export const uploadFormSchema = z
       required_error: "Confirm Reference is required",
     }),
     priority: z.string({ required_error: "Please select an option" }),
-    upload: z.string({ required_error: "Please select a file" }),
+    file: z.string({ required_error: "Please select a file" }),
   })
   .superRefine(({ confirm_reference, reference }, ctx) => {
     if (confirm_reference !== reference) {

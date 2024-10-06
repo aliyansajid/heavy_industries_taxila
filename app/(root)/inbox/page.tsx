@@ -21,7 +21,7 @@ async function getData() {
   return JSON.parse(data);
 }
 
-const Inbox: React.FC = async () => {
+const Inbox = async () => {
   const data = await getData();
 
   return (

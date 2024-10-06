@@ -62,6 +62,12 @@ export const sidebarLinks = [
     icon: Send,
   },
   {
+    label: "Requests",
+    route: "/requests",
+    icon: Inbox,
+  },
+
+  {
     label: "Send Request",
     route: "/send-request",
     icon: FileText,
@@ -74,9 +80,18 @@ export const sidebarLinks = [
 ];
 
 export const roleBasedMenuOptions: Record<Role, string[]> = {
-  Admin: ["/create-department", "/create-user"],
-  CR: ["/upload", "/search", "/track-letter", "/logout"],
-  User: ["/inbox", "/outbox", "/write", "/send", "/send-request", "/logout"],
+  Admin: ["/create-department", "/create-user", "/logout"],
+  CR: ["/upload", "/search", "/requests", "/logout"],
+  User: [
+    "/inbox",
+    "/outbox",
+    "/outbox",
+    "/track-letter",
+    "/write",
+    "/send",
+    "/send-request",
+    "/logout",
+  ],
 };
 
 export const getSidebarLinksByRole = (userRole: Role) => {

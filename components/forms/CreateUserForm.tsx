@@ -34,34 +34,37 @@ const CreateUserForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/create-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      const result = await response.json();
 
       if (!response.ok) {
         toast({
-          description:
-            "There was an error creating the user. Please try again.",
+          description: result.message,
           variant: "destructive",
         });
+      } else {
+        toast({
+          description: result.message,
+          variant: "default",
+        });
+        form.reset();
       }
-
-      const data = await response.json();
-      toast({
-        description: "User created successfully.",
-        variant: "default",
-      });
-      form.reset();
     } catch (error) {
+      console.error("Error creating user: ", error);
       toast({
-        description: "There was an error creating the user. Please try again.",
+        description: "There was an error creating the user.",
         variant: "destructive",
       });
-      console.error("Error creating user:", error);
     } finally {
       setIsLoading(false);
     }

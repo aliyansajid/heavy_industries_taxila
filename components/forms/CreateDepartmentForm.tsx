@@ -31,15 +31,25 @@ const CreateDepartmentForm = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/users");
-        const data = await response.json();
-        setEmployees(data);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/get-users`
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast({
+            description: result.message,
+            variant: "destructive",
+          });
+        } else {
+          setEmployees(result.users);
+        }
       } catch (error) {
+        console.error("Error fetching employees: ", error);
         toast({
           description: "There was an error fetching the employees.",
           variant: "destructive",
         });
-        console.error("Error fetching employees:", error);
       }
     };
 
@@ -50,33 +60,37 @@ const CreateDepartmentForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/departments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/department/create-department`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      const result = await response.json();
 
       if (!response.ok) {
         toast({
-          description: "There was an error creating the department.",
+          description: result.message,
           variant: "destructive",
         });
+      } else {
+        toast({
+          description: result.message,
+          variant: "default",
+        });
+        form.reset();
       }
-
-      const data = await response.json();
-      toast({
-        description: "Department created successfully.",
-        variant: "default",
-      });
-      form.reset();
     } catch (error) {
+      console.error("Error during department creation: ", error);
       toast({
         description: "There was an error creating the department.",
         variant: "destructive",
       });
-      console.error("Error during department creation:", error);
     } finally {
       setIsLoading(false);
     }
