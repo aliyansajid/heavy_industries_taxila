@@ -18,77 +18,95 @@ const UploadForm = () => {
   const { toast } = useToast();
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [letterInfo, setLetterInfo] = useState<{
+    id: string;
+    subject: string;
+    reference: string;
+  } | null>(null);
 
   const formSchema = uploadFormSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      subject: "",
-      reference: "",
-      confirm_reference: "",
-      priority: "",
-      file: "",
-    },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("subject", values.subject);
-      formData.append("reference", values.reference);
-      formData.append("priority", values.priority);
-      if (file) {
-        formData.append("file", file);
-      }
-      if (session) {
-        formData.append("uploadedBy", session?.user.id);
-      }
+  async function uploadLetter(values: z.infer<typeof formSchema>) {
+    const formData = new FormData();
+    formData.append("subject", values.subject);
+    formData.append("reference", values.reference);
+    formData.append("priority", values.priority);
+    if (file) {
+      formData.append("file", file);
+    }
+    if (session) {
+      formData.append("uploadedBy", session?.user.id);
+    }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/letters/upload-letter`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          description: result.message,
-          variant: "default",
-        });
-        form.reset();
-        setFile(null);
-      } else {
-        toast({
-          description: result.message,
-          variant: "destructive",
-        });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/letters/upload-letter`,
+      {
+        method: "POST",
+        body: formData,
       }
-    } catch (error) {
-      console.error("Error uploading letter: ", error);
+    );
+
+    const result = await response.json();
+
+    if (response.ok) {
+      setLetterInfo({
+        id: result.letter.id,
+        subject: values.subject,
+        reference: values.reference,
+      });
       toast({
-        description: "There was an error uploading the letter.",
+        description: result.message,
+        variant: "default",
+      });
+      form.reset({
+        subject: "",
+        reference: "",
+        confirm_reference: "",
+        priority: "",
+        file: "",
+      });
+      setFile(null);
+      return result.letter;
+    } else {
+      toast({
+        description: result.message,
         variant: "destructive",
       });
+    }
+  }
+
+  async function handleSaveInSystem(values: z.infer<typeof formSchema>) {
+    setIsSaving(true);
+    try {
+      await uploadLetter(values);
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
+    }
+  }
+
+  async function handleSend(values: z.infer<typeof formSchema>) {
+    setIsSending(true);
+    try {
+      const uploadedLetter = await uploadLetter(values);
+      if (uploadedLetter) {
+        setIsModalOpen(true);
+      }
+    } finally {
+      setIsSending(false);
     }
   }
 
   return (
     <div className="flex justify-center">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-5 w-1/2 p-8"
-        >
+        <form className="space-y-5 w-1/2 p-8">
           <CustomFormField
             fieldType={FormFieldType.INPUT}
             control={form.control}
@@ -146,9 +164,10 @@ const UploadForm = () => {
                 variant={ButtonVariant.OUTLINE}
                 text={"Save in system"}
                 iconSrc={Save}
-                disabled={isLoading}
-                isLoading={isLoading}
+                disabled={isSaving || isSending}
+                isLoading={isSaving}
                 className="w-full"
+                onClick={form.handleSubmit(handleSaveInSystem)}
               />
             </div>
             <div className="flex-1">
@@ -157,18 +176,25 @@ const UploadForm = () => {
                 text={"Send"}
                 className="w-full"
                 iconSrc={Send}
-                onClick={() => setIsModalOpen(true)}
+                disabled={isSending || isSaving}
+                isLoading={isSending}
+                onClick={form.handleSubmit(handleSend)}
               />
             </div>
-            {isModalOpen && (
-              <SendLetterModal
-                isOpen={isModalOpen}
-                setIsOpen={setIsModalOpen}
-              />
-            )}
           </div>
         </form>
       </Form>
+
+      {isModalOpen && letterInfo && session?.user?.id && (
+        <SendLetterModal
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
+          letterId={letterInfo.id}
+          subject={letterInfo.subject}
+          reference={letterInfo.reference}
+          uploadedBy={session.user.id}
+        />
+      )}
     </div>
   );
 };

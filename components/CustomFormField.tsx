@@ -130,7 +130,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         <MultiSelect
           options={options || []}
           onValueChange={field.onChange}
-          defaultValue={field.value}
+          value={field.value}
           placeholder={placeholder}
           variant="inverted"
           animation={2}

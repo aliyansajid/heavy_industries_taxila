@@ -70,7 +70,9 @@ export const sendSchema = z.object({
 
 export const sendLetterSchema = z.object({
   department: z.string({ required_error: "Please select a department" }),
-  employees: z.string({
-    required_error: "Please select at least one employee",
-  }),
+  employees: z.array(
+    z.string({
+      required_error: "Please select at least one employee",
+    })
+  ),
 });

@@ -1,6 +1,7 @@
 import { auth } from "./auth";
 
-export default auth((req) => {
+export default auth(async (req) => {
+  const session = await auth();
   const publicRoutes = ["/"];
 
   const protectedRoutes = [
@@ -29,7 +30,14 @@ export default auth((req) => {
 
   if (nextUrl.pathname === "/") {
     if (isLoggedIn) {
-      return Response.redirect(new URL("/inbox", nextUrl));
+      if (session?.user.role === "Admin") {
+        return Response.redirect(new URL("/create-user", nextUrl));
+      }
+      if (session?.user.role === "CR") {
+        return Response.redirect(new URL("/upload", nextUrl));
+      } else {
+        return Response.redirect(new URL("/inbox", nextUrl));
+      }
     }
     return undefined;
   }

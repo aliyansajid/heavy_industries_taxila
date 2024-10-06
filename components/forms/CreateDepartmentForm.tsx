@@ -25,7 +25,6 @@ const CreateDepartmentForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", description: "", employees: [] },
   });
 
   useEffect(() => {
@@ -83,7 +82,11 @@ const CreateDepartmentForm = () => {
           description: result.message,
           variant: "default",
         });
-        form.reset();
+        form.reset({
+          name: "",
+          description: "",
+          employees: [],
+        });
       }
     } catch (error) {
       console.error("Error during department creation: ", error);

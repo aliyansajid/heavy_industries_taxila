@@ -20,14 +20,6 @@ const CreateUserForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      username: "",
-      designation: "",
-      rank: "",
-      password: "",
-      role: "",
-    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -57,7 +49,14 @@ const CreateUserForm = () => {
           description: result.message,
           variant: "default",
         });
-        form.reset();
+        form.reset({
+          name: "",
+          username: "",
+          designation: "",
+          rank: "",
+          password: "",
+          role: "",
+        });
       }
     } catch (error) {
       console.error("Error creating user: ", error);

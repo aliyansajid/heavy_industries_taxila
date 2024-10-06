@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SelectItem } from "../ui/select";
 import ModalDialog from "../ModalDialog";
 import { Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Employee = {
   id: string;
@@ -18,6 +19,7 @@ type Employee = {
 };
 
 type Department = {
+  id: string;
   name: string;
   employees: Employee[];
 };
@@ -25,54 +27,119 @@ type Department = {
 const SendLetterModal = ({
   isOpen,
   setIsOpen,
+  letterId,
+  subject,
+  reference,
+  uploadedBy,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  letterId: string;
+  subject: string;
+  reference: string;
+  uploadedBy: string;
 }) => {
+  const { toast } = useToast();
   const formSchema = sendLetterSchema;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<Department | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departmentSelected, setDepartmentSelected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       const fetchDepartments = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/departments`,
-            {
-              method: "GET",
-            }
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/department/get-departments`
           );
           const data = await response.json();
-          setDepartments(data);
+          setDepartments(data.departments);
         } catch (error) {
           console.error("Error fetching departments:", error);
+          toast({
+            description: "There was an error fetching the departments.",
+            variant: "destructive",
+          });
         }
       };
       fetchDepartments();
     }
   }, [isOpen]);
 
-  const handleDepartmentChange = (selectedDepartment: string) => {
+  const handleDepartmentChange = (selectedDepartmentName: string) => {
     const department = departments.find(
-      (dept: Department) => dept.name === selectedDepartment
+      (dept: Department) => dept.name === selectedDepartmentName
     );
     if (department) {
       setEmployees(department.employees);
+      setSelectedDepartment(department);
       setDepartmentSelected(true);
     } else {
       setEmployees([]);
+      setSelectedDepartment(null);
       setDepartmentSelected(false);
     }
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {}
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+
+    if (!selectedDepartment) {
+      toast({
+        description: "Please select a department.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/scanner/create-scanner`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            letterId,
+            departmentId: selectedDepartment.id,
+            sendTo: values.employees,
+            sendBy: uploadedBy,
+            subject,
+            reference,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setIsOpen(false);
+        toast({
+          description: "Letter sent successfully.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          description: "There was an error sending the letter.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error sending letter: ", error);
+      toast({
+        description: "There was an error sending the letter.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <ModalDialog
@@ -116,6 +183,8 @@ const SendLetterModal = ({
             text={"Send"}
             className="w-full"
             iconSrc={Send}
+            disabled={isLoading}
+            isLoading={isLoading}
           />
         </form>
       </Form>
