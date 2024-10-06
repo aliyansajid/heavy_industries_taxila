@@ -1,7 +1,11 @@
 const express = require("express");
-const { createDepartment } = require("../controllers/departmentController");
+const {
+  createDepartment,
+  getDepartments,
+} = require("../controllers/departmentController");
 const router = express.Router();
 
-router.post("/", createDepartment);
+router.post("/create-department", createDepartment);
+router.get("/get-departments", getDepartments);
 
 module.exports = router;

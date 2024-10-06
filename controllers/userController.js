@@ -5,8 +5,10 @@ const saltRounds = 10;
 
 exports.createUser = async (req, res) => {
   const { name, username, designation, rank, password, role } = req.body;
+
   try {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const newUser = await prisma.user.create({
       data: {
         name,
@@ -17,10 +19,18 @@ exports.createUser = async (req, res) => {
         role,
       },
     });
-    res.status(201).json(newUser);
+
+    res.status(201).json({
+      status: "success",
+      message: "User created successfully.",
+      user: newUser,
+    });
   } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ error: "Error creating user" });
+    console.error("Error creating user: ", error);
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while creating the user.",
+    });
   }
 };
 
@@ -33,8 +43,17 @@ exports.getUsers = async (req, res) => {
         role: true,
       },
     });
-    res.json(users);
+
+    res.status(200).json({
+      status: "success",
+      users: users,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching users" });
+    console.error("Error fetching users: ", error);
+
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while fetching users.",
+    });
   }
 };

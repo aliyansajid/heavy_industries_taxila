@@ -19,26 +19,42 @@ model Department {
 }
 
 model User {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  username    String        @unique
-  designation String
-  rank        String
-  password    String
-  role        String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  departments DepartmentEmployees[]
+  id           String                 @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  username     String                 @unique
+  designation  String
+  rank         String
+  password     String
+  role         String
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  
+  departments  DepartmentEmployees[]
+  letters      Letter[]
 
   @@map("users")
 }
 
 model DepartmentEmployees {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  department  Department  @relation(fields: [departmentId], references: [id])
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  department   Department @relation(fields: [departmentId], references: [id])
   departmentId String     @db.ObjectId
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String      @db.ObjectId
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String     @db.ObjectId
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Letter {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  subject      String   
+  reference    String   
+  priority     String
+  fileLocation String   
+  drafts       String?   
+  remarks      String?  
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+  uploadedById String    @db.ObjectId
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
