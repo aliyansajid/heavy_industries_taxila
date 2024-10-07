@@ -35,12 +35,12 @@ model Department {
 
 model Letter {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  subject      String   
-  reference    String   
+  subject      String
+  reference    String
   priority     String
   fileLocation String
-  drafts       String?   
-  remarks      String?  
+  drafts       String[]
+  remarks      String[]
   uploadedBy   String   @db.ObjectId
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -55,12 +55,24 @@ model Scanner {
   letter         Letter     @relation("LetterScanners", fields: [letterId], references: [id])
   letterId       String     @db.ObjectId
   sendTo         String[]
-  sendBy         String     @db.ObjectId
-  departmentId   String     @db.ObjectId
+  sendBy         String
+  departmentId   String?    @db.ObjectId
   subject        String
   reference      String
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
   @@map("scanners")
+}
+
+model Draft {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  draft       String
+  subject     String
+  filePath    String
+  attachments String[]
+  createdBy   String   @db.ObjectId
+  createdAt   DateTime @default(now())
+
+  @@map("drafts")
 }
