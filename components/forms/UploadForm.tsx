@@ -43,6 +43,7 @@ const UploadForm = () => {
     }
     if (session) {
       formData.append("uploadedBy", session?.user.id);
+      formData.append("sendBy", session.user.name);
     }
 
     const response = await fetch(

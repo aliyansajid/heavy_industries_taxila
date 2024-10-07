@@ -13,6 +13,7 @@ const SendRequestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const formSchema = z.object({
+    subject: z.string({ required_error: "Subject is required" }),
     message: z.string({ required_error: "Message is required" }),
   });
 
@@ -31,6 +32,14 @@ const SendRequestForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-5 p-8 w-1/2"
         >
+          <CustomFormField
+            fieldType={FormFieldType.INPUT}
+            control={form.control}
+            name="subject"
+            label="Subject"
+            placeholder="Enter subject"
+          />
+
           <CustomFormField
             fieldType={FormFieldType.TEXTAREA}
             control={form.control}

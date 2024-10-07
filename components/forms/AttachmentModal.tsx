@@ -1,14 +1,16 @@
 import CustomButton, { ButtonVariant } from "../CustomButton";
 import ModalDialog from "../ModalDialog";
 import { PlusCircle } from "lucide-react";
-import SearchForm from "./SearchForm";
+import SearchAttachment from "./SearchAttachment";
 
-const SearchModal = ({
+const AttachmentModal = ({
   isOpen,
   setIsOpen,
+  onAttachmentSelected,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  onAttachmentSelected: (fileLocation: string) => void;
 }) => {
   return (
     <ModalDialog
@@ -17,15 +19,16 @@ const SearchModal = ({
       description="Please select attachments to send"
       onClose={() => setIsOpen(false)}
     >
-      <SearchForm className="w-4/6" />
+      <SearchAttachment onAttachmentSelected={onAttachmentSelected} />
       <CustomButton
         variant={ButtonVariant.DEFAULT}
         text={"Select"}
         className="w-full"
         iconSrc={PlusCircle}
+        onClick={() => setIsOpen(false)}
       />
     </ModalDialog>
   );
 };
 
-export default SearchModal;
+export default AttachmentModal;

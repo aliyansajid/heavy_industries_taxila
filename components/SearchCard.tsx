@@ -1,24 +1,23 @@
-import Link from "next/link";
+import React from "react";
 
-const SearchCard = ({
-  id,
-  subject,
-  reference,
-  priority,
-}: {
+type SearchCardProps = {
   id: string;
   subject: string;
   reference: string;
-  priority: string;
+  onClick?: () => void;
+};
+
+const SearchCard: React.FC<SearchCardProps> = ({
+  id,
+  subject,
+  reference,
+  onClick,
 }) => {
   return (
-    <Link href={`/inbox/${id}`} passHref>
-      <div className="cursor-pointer bg-transparent border border-border-primary rounded-md space-y-3 p-4 max-w-md hover:shadow transition-shadow duration-200">
-        <h3 className="text-lg font-medium text-dark-primary">{subject}</h3>
-        <p className="text-sm text-dark-secondary ">{reference}</p>
-        <p className="text-sm text-dark-secondary ">{priority}</p>
-      </div>
-    </Link>
+    <div className="border p-4 rounded" onClick={onClick}>
+      <h3 className="font-bold">{subject}</h3>
+      <p>Reference: {reference}</p>
+    </div>
   );
 };
 

@@ -11,7 +11,7 @@ import { SelectItem } from "../ui/select";
 import { Files, Send } from "lucide-react";
 import { sendSchema } from "@/lib/utils";
 import SendLetterModal from "./SendLetterModal";
-import SearchModal from "./SearchModal";
+import SearchModal from "./AttachmentModal";
 
 const SendForm = () => {
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false);

@@ -14,6 +14,12 @@ export const createDepartmentSchema = z.object({
   description: z.string().optional(),
 });
 
+export const createDraftSchema = z.object({
+  draft: z.string({ required_error: "Draft is required" }),
+  subject: z.string({ required_error: "Subject is required" }),
+  file: z.string({ required_error: "Please select a file" }),
+});
+
 export const createUserSchema = z.object({
   name: z.string({ required_error: "Name is required" }),
   username: z.string({ required_error: "Username is required" }),
