@@ -161,6 +161,12 @@ exports.forwardLetter = async (req, res) => {
       where: { inbox: { has: letterId } },
     });
 
+    if (usersWithLetter.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No users found with this letter." });
+    }
+
     for (const user of usersWithLetter) {
       const updatedInbox = user.inbox.filter((id) => id !== letterId);
 
@@ -179,9 +185,29 @@ exports.forwardLetter = async (req, res) => {
       },
     });
 
-    const updatedToUser = await prisma.user.findUnique({
+    const fromUser = usersWithLetter[0];
+    const fromUserName = fromUser.name;
+
+    const toUser = await prisma.user.findUnique({
       where: { id: toUserId },
-      select: { inbox: true },
+      select: { name: true },
+    });
+    const toUserName = toUser.name;
+
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const newRemark = `By ${fromUserName} to ${toUserName} on ${currentDate}`;
+
+    await prisma.letter.update({
+      where: { id: letterId },
+      data: {
+        remarks: {
+          push: newRemark,
+        },
+      },
     });
 
     const scanner = await prisma.scanner.findFirst({
@@ -197,13 +223,9 @@ exports.forwardLetter = async (req, res) => {
       },
     });
 
-    const updatedScanner = await prisma.scanner.findUnique({
-      where: { id: scanner.id },
-    });
-
     res.status(200).json({
       status: "ok",
-      message: "Letter forwarded successfully.",
+      message: "Letter forwarded successfully with a remark added.",
     });
   } catch (error) {
     console.error("Error forwarding letter:", error);
