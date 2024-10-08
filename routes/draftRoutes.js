@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { createDraft } = require("../controllers/draftController");
+const { createDraft, getDraftById } = require("../controllers/draftController");
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -16,5 +16,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/create-draft", upload.single("file"), createDraft);
+router.get("/get-draft/:id", getDraftById);
 
 module.exports = router;

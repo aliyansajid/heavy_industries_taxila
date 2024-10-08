@@ -70,8 +70,8 @@ model Draft {
   draft       String
   subject     String
   filePath    String
-  attachments String[]
-  createdBy   String   @db.ObjectId
+  attachment  String
+  createdBy   String
   createdAt   DateTime @default(now())
 
   @@map("drafts")

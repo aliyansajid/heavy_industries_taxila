@@ -5,6 +5,7 @@ const {
   getLetters,
   getLetterById,
   addRemark,
+  forwardLetter,
 } = require("../controllers/letterController");
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post("/upload-letter", upload.single("file"), uploadLetter);
 router.get("/get-letters/:userId", getLetters);
 router.get("/:id", getLetterById);
 router.post("/add-remark/:id", addRemark);
+router.post("/forward-letter/", forwardLetter);
 
 module.exports = router;

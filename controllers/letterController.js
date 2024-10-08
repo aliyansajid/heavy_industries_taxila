@@ -144,3 +144,72 @@ exports.addRemark = async (req, res) => {
     });
   }
 };
+
+exports.forwardLetter = async (req, res) => {
+  const { letterId, toUserId } = req.body;
+
+  try {
+    const letter = await prisma.letter.findUnique({
+      where: { id: letterId },
+    });
+
+    if (!letter) {
+      return res.status(404).json({ message: "Letter not found." });
+    }
+
+    const usersWithLetter = await prisma.user.findMany({
+      where: { inbox: { has: letterId } },
+    });
+
+    for (const user of usersWithLetter) {
+      const updatedInbox = user.inbox.filter((id) => id !== letterId);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { inbox: updatedInbox },
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: toUserId },
+      data: {
+        inbox: {
+          push: letterId,
+        },
+      },
+    });
+
+    const updatedToUser = await prisma.user.findUnique({
+      where: { id: toUserId },
+      select: { inbox: true },
+    });
+
+    const scanner = await prisma.scanner.findFirst({
+      where: { letterId: letterId },
+    });
+
+    await prisma.scanner.update({
+      where: { id: scanner.id },
+      data: {
+        sendTo: {
+          push: toUserId,
+        },
+      },
+    });
+
+    const updatedScanner = await prisma.scanner.findUnique({
+      where: { id: scanner.id },
+    });
+
+    res.status(200).json({
+      status: "ok",
+      message: "Letter forwarded successfully.",
+    });
+  } catch (error) {
+    console.error("Error forwarding letter:", error);
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred while forwarding the letter.",
+    });
+  }
+};
