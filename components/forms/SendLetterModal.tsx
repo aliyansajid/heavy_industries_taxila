@@ -12,6 +12,7 @@ import { SelectItem } from "../ui/select";
 import ModalDialog from "../ModalDialog";
 import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type Employee = {
   id: string;
@@ -31,14 +32,17 @@ const SendLetterModal = ({
   subject,
   reference,
   uploadedBy,
+  actionType,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   letterId: string;
-  subject: string;
-  reference: string;
-  uploadedBy: string;
+  subject?: string;
+  reference?: string;
+  uploadedBy?: string;
+  actionType: "create" | "forward";
 }) => {
+  const router = useRouter();
   const { toast } = useToast();
   const formSchema = sendLetterSchema;
 
@@ -91,49 +95,67 @@ const SendLetterModal = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    if (!selectedDepartment) {
-      toast({
-        description: "Please select a department.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/scanner/create-scanner`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            letterId,
-            departmentId: selectedDepartment.id,
-            sendTo: values.employees,
-            sendBy: uploadedBy,
-            subject,
-            reference,
-          }),
-        }
-      );
+      const selectedEmployeeId = values.employees[0];
+      let response: Response | undefined = undefined;
 
-      if (response.ok) {
+      if (actionType === "create") {
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/scanner/create-scanner`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              letterId,
+              departmentId: selectedDepartment?.id,
+              sendTo: values.employees,
+              sendBy: uploadedBy,
+              subject,
+              reference,
+            }),
+          }
+        );
+      } else if (actionType === "forward") {
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/letters/forward-letter`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              letterId,
+              fromUserId: uploadedBy,
+              toUserId: selectedEmployeeId,
+            }),
+          }
+        );
+      }
+
+      if (response?.ok) {
         setIsOpen(false);
         toast({
-          description: "Letter sent successfully.",
+          description:
+            actionType === "create"
+              ? "Letter sent successfully."
+              : "Letter forwarded successfully.",
           variant: "default",
         });
-      } else {
+        router.push("/inbox");
+      } else if (response) {
+        const result = await response.json();
         toast({
-          description: "There was an error sending the letter.",
+          description:
+            result.error || "There was an error processing the letter.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Error sending letter: ", error);
+      console.error("Error processing letter:", error);
       toast({
-        description: "There was an error sending the letter.",
+        description: "There was an error processing the letter.",
         variant: "destructive",
       });
     } finally {
@@ -144,8 +166,8 @@ const SendLetterModal = ({
   return (
     <ModalDialog
       isOpen={isOpen}
-      title="Send Letter"
-      description="Select the department and employees to send the letter"
+      title={actionType === "create" ? "Send Letter" : "Forward Letter"}
+      description="Select the department and employees"
       onClose={() => setIsOpen(false)}
     >
       <Form {...form}>
@@ -180,7 +202,7 @@ const SendLetterModal = ({
 
           <CustomButton
             variant={ButtonVariant.DEFAULT}
-            text={"Send"}
+            text={actionType === "create" ? "Send" : "Forward"}
             className="w-full"
             iconSrc={Send}
             disabled={isLoading}

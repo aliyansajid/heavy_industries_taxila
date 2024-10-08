@@ -35,13 +35,11 @@ const SearchAttachment = ({
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/search/search-attachments?search=${search}&field=${selectField}`
       );
       const data = await response.json();
-      console.log("Search API Response:", data);
       setResults(data);
       setHasSearched(true);
     } catch (error) {
-      console.error("Error fetching search results: ", error);
       toast({
-        description: "There was an error fetching the results.",
+        description: "TThere was an error fetching the results.",
         variant: "destructive",
       });
     }
@@ -84,18 +82,18 @@ const SearchAttachment = ({
       {hasSearched && (
         <>
           {results.length > 0 ? (
-            <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((result: any) => (
-                <SearchCard
-                  key={result.id}
-                  id={result.id}
-                  subject={result.subject}
-                  reference={result.reference}
-                  priority={result.priority}
-                  onClick={() => handleAttachmentClick(result.fileLocation)}
-                />
+            <>
+              {results.map((result: any, index: number) => (
+                <div key={result.id}>
+                  <SearchCard
+                    id={result.id}
+                    subject={result.subject}
+                    reference={result.reference}
+                    onClick={() => handleAttachmentClick(result.fileLocation)}
+                  />
+                </div>
               ))}
-            </div>
+            </>
           ) : (
             <p className="text-dark-secondary">No results found</p>
           )}

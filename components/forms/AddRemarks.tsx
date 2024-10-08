@@ -9,7 +9,7 @@ import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { useToast } from "@/hooks/use-toast";
 import ModalDialog from "../ModalDialog";
 import CustomButton, { ButtonVariant } from "../CustomButton";
-import { Send } from "lucide-react";
+import { Plus, PlusCircle, Send } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 const AddRemarks = ({ letterId }: { letterId: string }) => {
@@ -74,6 +74,7 @@ const AddRemarks = ({ letterId }: { letterId: string }) => {
       <CustomButton
         variant={ButtonVariant.DEFAULT}
         text="Add"
+        iconSrc={PlusCircle}
         onClick={() => setIsOpen(true)}
       />
 

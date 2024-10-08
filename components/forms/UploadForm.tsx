@@ -194,6 +194,7 @@ const UploadForm = () => {
           subject={letterInfo.subject}
           reference={letterInfo.reference}
           uploadedBy={session.user.id}
+          actionType="create"
         />
       )}
     </div>

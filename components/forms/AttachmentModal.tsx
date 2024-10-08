@@ -15,14 +15,14 @@ const AttachmentModal = ({
   return (
     <ModalDialog
       isOpen={isOpen}
-      title="Select Attachments"
-      description="Please select attachments to send"
+      title="Add Attachment"
+      description="Select an attachment to include with the letter"
       onClose={() => setIsOpen(false)}
     >
       <SearchAttachment onAttachmentSelected={onAttachmentSelected} />
       <CustomButton
         variant={ButtonVariant.DEFAULT}
-        text={"Select"}
+        text="Select"
         className="w-full"
         iconSrc={PlusCircle}
         onClick={() => setIsOpen(false)}

@@ -25,7 +25,9 @@ const CreateDraftForm = ({
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
+  const [selectedAttachment, setSelectedAttachment] = useState<string | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const formSchema = createDraftSchema;
@@ -34,23 +36,24 @@ const CreateDraftForm = ({
     resolver: zodResolver(formSchema),
   });
 
-  const handleOpen = () => {
-    setIsOpen(true);
-  };
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append("draft", values.draft);
       formData.append("subject", values.subject);
+
       if (file) {
         formData.append("file", file);
       }
+
       if (session && session.user && session.user.id) {
-        formData.append("createdBy", session.user.id);
+        formData.append("createdBy", session.user.name);
       }
-      formData.append("attachments", JSON.stringify(selectedAttachments));
+
+      if (selectedAttachment) {
+        formData.append("attachment", selectedAttachment);
+      }
       formData.append("letterId", letterId);
 
       const response = await fetch(
@@ -61,16 +64,19 @@ const CreateDraftForm = ({
         }
       );
 
+      const result = await response.json();
+
       if (response.ok) {
-        toast({ description: "Draft created successfully!" });
+        toast({ description: result.message });
         setIsOpen(false);
       } else {
-        const errorData = await response.json();
-        toast({ description: errorData.error, variant: "destructive" });
+        toast({ description: result.error, variant: "destructive" });
       }
     } catch (error) {
-      console.error("Error creating draft: ", error);
-      toast({ description: "Error creating draft.", variant: "destructive" });
+      toast({
+        description: "There was an error creating the draft.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +119,7 @@ const CreateDraftForm = ({
               }}
               className="cursor-pointer"
             />
+
             <div className="flex gap-4">
               <div className="flex-1">
                 <CustomButton
@@ -134,7 +141,6 @@ const CreateDraftForm = ({
                   iconSrc={Save}
                   disabled={isLoading}
                   isLoading={isLoading}
-                  onClick={handleOpen}
                 />
               </div>
             </div>
@@ -147,7 +153,8 @@ const CreateDraftForm = ({
           isOpen={isModalOpen}
           setIsOpen={setIsModalOpen}
           onAttachmentSelected={(attachment) => {
-            setSelectedAttachments((prev) => [...prev, attachment]);
+            setSelectedAttachment(attachment);
+            setIsModalOpen(false);
           }}
         />
       )}

@@ -1,5 +1,3 @@
-import React from "react";
-
 type SearchCardProps = {
   id: string;
   subject: string;
@@ -7,16 +5,17 @@ type SearchCardProps = {
   onClick?: () => void;
 };
 
-const SearchCard: React.FC<SearchCardProps> = ({
-  id,
-  subject,
-  reference,
-  onClick,
-}) => {
+const SearchCard = ({ id, subject, reference, onClick }: SearchCardProps) => {
   return (
-    <div className="border p-4 rounded" onClick={onClick}>
-      <h3 className="font-bold">{subject}</h3>
-      <p>Reference: {reference}</p>
+    <div className="border p-4 rounded hover:cursor-pointer" onClick={onClick}>
+      <p className="text-dark-secondary">
+        <span className="text-dark-primary font-medium">Subject:</span>{" "}
+        {subject}
+      </p>
+      <p className="text-dark-secondary">
+        <span className="text-dark-primary font-medium">Reference:</span>{" "}
+        {reference}
+      </p>
     </div>
   );
 };

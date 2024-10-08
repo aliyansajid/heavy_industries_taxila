@@ -9,6 +9,7 @@ import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { SelectItem } from "../ui/select";
 import { useToast } from "@/hooks/use-toast";
 import SearchCard from "../SearchCard";
+import ScannerHistory from "../ScannerHistory";
 
 const formSchema = z.object({
   search: z
@@ -21,6 +22,8 @@ const SearchForm = ({ className }: { className?: string }) => {
   const { toast } = useToast();
   const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,51 +54,65 @@ const SearchForm = ({ className }: { className?: string }) => {
     fetchSearchResults(values.search, values.selectField);
   }
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div className="flex gap-4">
-          <div className={className}>
-            <CustomFormField
-              fieldType={FormFieldType.INPUT}
-              control={form.control}
-              name="search"
-              placeholder="Search by reference or subject"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomFormField
-              fieldType={FormFieldType.SELECT}
-              control={form.control}
-              name="selectField"
-              placeholder="Select an option"
-            >
-              <SelectItem value="Subject">Subject</SelectItem>
-              <SelectItem value="Reference">Reference</SelectItem>
-            </CustomFormField>
-          </div>
-        </div>
-      </form>
+  const handleCardClick = (result: any) => {
+    setSelectedResult(result);
+    setIsModalOpen(true);
+  };
 
-      {hasSearched && (
-        <div className="mt-8">
-          {results.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {results.map((result: any) => (
-                <SearchCard
-                  key={result.id}
-                  id={result.id}
-                  subject={result.subject}
-                  reference={result.reference}
-                />
-              ))}
+  return (
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <div className="flex gap-4">
+            <div className={className}>
+              <CustomFormField
+                fieldType={FormFieldType.INPUT}
+                control={form.control}
+                name="search"
+                placeholder="Search by reference or subject"
+              />
             </div>
-          ) : (
-            <p className="text-dark-secondary">No results found</p>
-          )}
-        </div>
-      )}
-    </Form>
+            <div className="flex-1">
+              <CustomFormField
+                fieldType={FormFieldType.SELECT}
+                control={form.control}
+                name="selectField"
+                placeholder="Select an option"
+              >
+                <SelectItem value="Subject">Subject</SelectItem>
+                <SelectItem value="Reference">Reference</SelectItem>
+              </CustomFormField>
+            </div>
+          </div>
+        </form>
+
+        {hasSearched && (
+          <div className="mt-8">
+            {results.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {results.map((result: any) => (
+                  <SearchCard
+                    key={result.id}
+                    id={result.id}
+                    subject={result.subject}
+                    reference={result.reference}
+                    onClick={() => handleCardClick(result)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-dark-secondary">No results found</p>
+            )}
+          </div>
+        )}
+      </Form>
+
+      <ScannerHistory
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        selectedResult={selectedResult}
+      />
+    </>
   );
 };
 
